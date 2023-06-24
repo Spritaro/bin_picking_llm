@@ -128,3 +128,55 @@ class CameraBaseCalibrator:
             tvecs,
             self._square_size * 3,
         )
+
+
+class RobotBaseCalibrator:
+    """Class for calibrating the pose of a robot with respect to a
+    checkerboard."""
+
+    def __init__(
+        self,
+        rows: int,
+        cols: int,
+        square_size: float,
+    ):
+        self._board_height = rows * square_size
+        self._board_width = cols * square_size
+        self.clear_points()
+
+    def clear_points(self) -> None:
+        self._points = []
+
+    def add_point(self, x, y, z) -> None:
+        self._points.append([x, y, z])
+
+    def is_ready(self) -> bool:
+        return len(self._points) == 4
+
+    def calc_transform_matrix(self) -> Optional[np.ndarray]:
+        if not self.is_ready():
+            return None
+
+        board_points = np.array(
+            [
+                [0, 0, 0],
+                [self._board_height, 0, 0],
+                [self._board_height, self._board_width, 0],
+                [0, self._board_width, 0],
+            ],
+            dtype=np.float32,
+        )
+
+        robot_points = np.array(self._points, dtype=np.float32)
+
+        # Create affine transformation matrix
+        _, out, inliers = cv2.estimateAffine3D(src=board_points, dst=robot_points)
+
+        # Check for outliers
+        if any(map(lambda x: x == -1, inliers)):
+            return None
+
+        affine_transform_matrix = np.zeros((4, 4), dtype=np.float32)
+        affine_transform_matrix[:3, :] = out
+        affine_transform_matrix[3, 3] = 1
+        return affine_transform_matrix
