@@ -9,7 +9,7 @@ import pyrealsense2 as rs
 class RealSenseCamera:
     """Class to access RealSense camera."""
 
-    def __init__(self) -> None:
+    def __init__(self):
         """Initializes the RealSenseCamera object."""
         self._pipeline = rs.pipeline()
         self._config = rs.config()
@@ -17,12 +17,11 @@ class RealSenseCamera:
         self._config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
         self._config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
 
-    def start(self) -> None:
-        """Starts the camera pipeline."""
+    def __enter__(self):
         self._pipeline.start(self._config)
+        return self
 
-    def stop(self) -> None:
-        """Stops the camera pipeline."""
+    def __exit__(self, exc_type, exc_value, traceback):
         self._pipeline.stop()
 
     def get_intrinsics(self) -> Dict:

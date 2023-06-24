@@ -28,10 +28,8 @@ def main():
 
     matrix = None
 
-    camera = RealSenseCamera()
-    camera.start()
+    with RealSenseCamera() as camera:
 
-    try:
         intrinsics = camera.get_intrinsics()
         print(intrinsics)
 
@@ -64,8 +62,6 @@ def main():
             if key & 0xFF == ord("q"):
                 break
 
-    finally:
-        camera.stop()
         cv2.destroyAllWindows()
         print(matrix)
 
