@@ -200,9 +200,8 @@ class RobotBaseCalibrator:
         # Create affine transformation matrix
         _, out, inliers = cv2.estimateAffine3D(src=board_points, dst=robot_points)
 
-        # Check for outliers
-        if any(map(lambda x: x == -1, inliers)):
-            return None
+        # All 4 points should be inliers
+        assert all(map(lambda x: x == 1, inliers))
 
         affine_transform_matrix = np.zeros((4, 4), dtype=np.float32)
         affine_transform_matrix[:3, :] = out
