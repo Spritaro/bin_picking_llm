@@ -6,8 +6,9 @@ import cv2
 import numpy as np
 
 
-class VisualPoseEstimator:
-    """Class for estimating the pose of a checkerboard pattern in an image."""
+class CameraBaseCalibrator:
+    """Class for calibrating the pose of a checkerboard pattern with respect
+    to a camera."""
 
     def __init__(
         self,

@@ -1,39 +1,22 @@
 """Script to estimate camera to checkerboard transformation"""
 
-import argparse
-
 import cv2
 
 from bin_picking_llm.camera import RealSenseCamera
-from bin_picking_llm.calibration import VisualPoseEstimator
+from bin_picking_llm.calibration import CameraBaseCalibrator
+from options import get_command_line_arguments
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="RealSense Camera Checkerboard Detection"
-    )
-    parser.add_argument(
-        "--columns",
-        type=int,
-        default=10,
-        help="Number of columns in the checkerboard pattern",
-    )
-    parser.add_argument(
-        "--rows", type=int, default=7, help="Number of rows in the checkerboard pattern"
-    )
-    parser.add_argument(
-        "--square-size", type=float, default=19.09, help="Size of each square in mm"
-    )
-    args = parser.parse_args()
+    args = get_command_line_arguments()
 
     matrix = None
 
     with RealSenseCamera() as camera:
-
         intrinsics = camera.get_intrinsics()
         print(intrinsics)
 
-        estimator = VisualPoseEstimator(
+        calibrator = CameraBaseCalibrator(
             fx=intrinsics["color"]["fx"],
             fy=intrinsics["color"]["fy"],
             cx=intrinsics["color"]["cx"],
@@ -49,10 +32,10 @@ def main():
             if image is None:
                 continue
 
-            rvecs, tvecs = estimator.estimate_pose(image)
+            rvecs, tvecs = calibrator.estimate_pose(image)
             if rvecs is not None and tvecs is not None:
-                matrix = estimator.calc_transform_matrix(rvecs, tvecs)
-                image = estimator.draw_axis(image, rvecs, tvecs)
+                matrix = calibrator.calc_transform_matrix(rvecs, tvecs)
+                image = calibrator.draw_axis(image, rvecs, tvecs)
             else:
                 print("Checkerboard not found")
 
