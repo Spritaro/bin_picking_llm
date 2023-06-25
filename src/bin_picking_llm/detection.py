@@ -1,0 +1,82 @@
+from collections import namedtuple
+import os.path
+import sys
+from typing import Dict, Tuple
+
+from detectron2.config import get_cfg
+from detectron2.utils.visualizer import VisImage
+import numpy as np
+import torch
+
+# TODO: Avoid adding third party library paths
+sys.path.append("third_party/Detic/third_party/CenterNet2")
+from centernet.config import add_centernet_config
+
+sys.path.append("third_party/Detic")
+from detic.config import add_detic_config
+from detic.predictor import BUILDIN_CLASSIFIER, VisualizationDemo
+
+
+def setup_cfg():
+    """Setup cfg object for creating Detic predictor."""
+    cfg = get_cfg()
+
+    if not torch.cuda.is_available():
+        cfg.MODEL.DEVICE = "cpu"
+
+    add_centernet_config(cfg)
+    add_detic_config(cfg)
+    cfg.merge_from_file(
+        "third_party/Detic/configs/Detic_LCOCOI21k_CLIP_R18_640b32_4x_ft4x_max-size.yaml"
+    )
+
+    # Set score_threshold for builtin models
+    threshold = 0.5
+    cfg.MODEL.RETINANET.SCORE_THRESH_TEST = threshold
+    cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = threshold
+    cfg.MODEL.PANOPTIC_FPN.COMBINE.INSTANCES_CONFIDENCE_THRESH = threshold
+
+    cfg.MODEL.ROI_BOX_HEAD.ZEROSHOT_WEIGHT_PATH = "rand"
+    cfg.MODEL.ROI_BOX_HEAD.CAT_FREQ_PATH = (
+        "third_party/Detic/datasets/metadata/lvis_v1_train_cat_info.json"
+    )
+
+    cfg.MODEL.WEIGHTS = (
+        "third_party/Detic/models/Detic_LCOCOI21k_CLIP_R18_640b32_4x_ft4x_max-size.pth"
+    )
+
+    # Predict all classes
+    cfg.MODEL.ROI_HEADS.ONE_CLASS_PER_PROPOSAL = True
+
+    cfg.freeze()
+    return cfg
+
+
+class DeticPredictor:
+    """Class to perform object detection using Detic."""
+
+    def __init__(self):
+        Args = namedtuple("Args", "vocabulary, custom_vocabulary")
+        args = Args(vocabulary="lvis", custom_vocabulary="")
+
+        # NOTE: Hacky workaround to fix classifier path
+        BUILDIN_CLASSIFIER[args.vocabulary] = os.path.join(
+            "third_party/Detic", BUILDIN_CLASSIFIER[args.vocabulary]
+        )
+
+        cfg = setup_cfg()
+
+        self.demo = VisualizationDemo(cfg, args)
+
+    def predict(self, image: np.ndarray) -> Tuple[Dict, VisImage]:
+        """Runs object detection on the input image.
+
+        Args:
+            image: a color image in BGR channel order.
+
+        Returns:
+            The prediction output of the model.
+            The visualized image output.
+        """
+        predictions, vis_output = self.demo.run_on_image(image)
+        return predictions, vis_output
