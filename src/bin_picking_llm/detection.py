@@ -1,7 +1,7 @@
 from collections import namedtuple
 import os.path
 import sys
-from typing import Dict, Tuple
+from typing import Tuple
 
 from detectron2.config import get_cfg
 from detectron2.utils.visualizer import VisImage
@@ -68,15 +68,19 @@ class DeticPredictor:
 
         self.demo = VisualizationDemo(cfg, args)
 
-    def predict(self, image: np.ndarray) -> Tuple[Dict, VisImage]:
+    def predict(self, image: np.ndarray) -> Tuple[np.ndarray, VisImage]:
         """Runs object detection on the input image.
 
         Args:
             image: a color image in BGR channel order.
 
         Returns:
-            The prediction output of the model.
-            The visualized image output.
+            Mask prediction.
+            Visualized image output.
         """
         predictions, vis_output = self.demo.run_on_image(image)
-        return predictions, vis_output
+
+        masks = predictions["instances"].pred_masks.detach().cpu().numpy()
+        masks = masks.astype(np.uint8) * 255
+
+        return masks, vis_output

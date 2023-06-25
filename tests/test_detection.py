@@ -12,5 +12,5 @@ def test_predictor():
 
     predictions, vis_output = predictor.predict(image)
 
-    assert isinstance(predictions, dict)
+    assert isinstance(predictions, np.ndarray)
     assert isinstance(vis_output, VisImage)
