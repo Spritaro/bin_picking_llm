@@ -1,9 +1,11 @@
-"""Script to estimate camera to checkerboard transformation"""
+"""Script to calibrate transformation of checkerboard to robot base"""
 
 import cv2
+import numpy as np
 
 from bin_picking_llm.robot import Dobot
 
+from bin_picking_llm import config
 from bin_picking_llm.calibration import RobotBaseCalibrator
 from bin_picking_llm.camera import RealSenseCamera
 from options import get_command_line_arguments
@@ -42,6 +44,8 @@ def main():
                 if calibrator.is_ready():
                     matrix = calibrator.calc_transform_matrix()
                     print(matrix)
+                    if matrix is not None:
+                        np.save(config.ROBOT_BASE_PATH, matrix)
 
         cv2.destroyAllWindows()
 

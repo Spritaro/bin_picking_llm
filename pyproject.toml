@@ -7,9 +7,15 @@ name = "bin_picking_llm"
 version = "0.0.1"
 description = "Package for controlling robots to perform bin picking using LLMs"
 dependencies = [
-  # "detectron2@git+https://github.com/facebookresearch/detectron2.git",
-  # "detic@git+https://github.com/facebookresearch/Detic.git",
+  "detectron2@git+https://github.com/facebookresearch/detectron2.git",
   "opencv-python",
   "pydobot",
-  # "pyrealsense2",
+  "pyrealsense2; platform_machine != 'aarch64'",
+  "torch; platform_machine != 'aarch64'",
+  "torchvision; platform_machine != 'aarch64'",
+]
+
+[project.optional-dependencies]
+test = [
+  "pytest",
 ]

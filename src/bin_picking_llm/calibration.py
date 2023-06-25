@@ -21,7 +21,7 @@ class CameraBaseCalibrator:
         cols: int,
         square_size: float,
     ):
-        """Initializes the pose estimator object.
+        """Initializes the camera base calibrator object.
 
         Args:
             fx: Focal length of the camera in the x direction.
@@ -140,20 +140,48 @@ class RobotBaseCalibrator:
         cols: int,
         square_size: float,
     ):
+        """Initializes robot base calibrator object.
+
+        Args:
+            rows: Number of rows in the checkerboard pattern.
+            cols: Number of columns in the checkerboard pattern.
+            square_size: Size of each square in the checkerboard
+            pattern.
+        """
         self._board_height = rows * square_size
         self._board_width = cols * square_size
         self.clear_points()
 
     def clear_points(self) -> None:
+        """Clears the previously added calibration points."""
         self._points = []
 
-    def add_point(self, x, y, z) -> None:
+    def add_point(self, x: float, y: float, z: float) -> None:
+        """Adds a calibration point.
+
+        Args:
+            x: X-coordinate of the calibration point.
+            y: Y-coordinate of the calibration point.
+            z: Z-coordinate of the calibration point.
+        """
         self._points.append([x, y, z])
 
     def is_ready(self) -> bool:
+        """Checks if enough calibration points have been added.
+
+        Returns:
+            True if enough calibration points have been added, False
+            otherwise.
+        """
         return len(self._points) == 4
 
     def calc_transform_matrix(self) -> Optional[np.ndarray]:
+        """Calculates the affine transformation matrix for the robot base.
+
+        Returns:
+            The affine transformation matrix, or None if the required number
+            of calibration points is not reached or ifoutliers are detected.
+        """
         if not self.is_ready():
             return None
 
@@ -172,9 +200,8 @@ class RobotBaseCalibrator:
         # Create affine transformation matrix
         _, out, inliers = cv2.estimateAffine3D(src=board_points, dst=robot_points)
 
-        # Check for outliers
-        if any(map(lambda x: x == -1, inliers)):
-            return None
+        # All 4 points should be inliers
+        assert all(map(lambda x: x == 1, inliers))
 
         affine_transform_matrix = np.zeros((4, 4), dtype=np.float32)
         affine_transform_matrix[:3, :] = out

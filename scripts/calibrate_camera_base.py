@@ -1,7 +1,9 @@
-"""Script to estimate camera to checkerboard transformation"""
+"""Script to calibrate transformation of camera base to checkerboard"""
 
 import cv2
+import numpy as np
 
+from bin_picking_llm import config
 from bin_picking_llm.camera import RealSenseCamera
 from bin_picking_llm.calibration import CameraBaseCalibrator
 from options import get_command_line_arguments
@@ -45,8 +47,12 @@ def main():
             if key & 0xFF == ord("q"):
                 break
 
+            if key & 0xFF == 13:  # Enter key
+                print(matrix)
+                if matrix is not None:
+                    np.save(config.CAMERA_BASE_PATH, matrix)
+
         cv2.destroyAllWindows()
-        print(matrix)
 
 
 if __name__ == "__main__":
