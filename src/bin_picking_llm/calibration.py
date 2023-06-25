@@ -5,6 +5,8 @@ from typing import List, Optional, Tuple
 import cv2
 import numpy as np
 
+from .utils import create_camera_matrix, create_dist_coeffs
+
 
 class CameraBaseCalibrator:
     """Class for calibrating the pose of a checkerboard pattern with respect
@@ -33,10 +35,8 @@ class CameraBaseCalibrator:
             cols: Number of columns in the checkerboard pattern.
             square_size: Size of each square in the checkerboard pattern.
         """
-        self._camera_matrix = np.array(
-            [[fx, 0, cx], [0, fy, cy], [0, 0, 1]], dtype=np.float32
-        )
-        self._dist_coeffs = np.array(dist_coeffs, dtype=np.float32)
+        self._camera_matrix = create_camera_matrix(fx, fy, cx, cy)
+        self._dist_coeffs = create_dist_coeffs(dist_coeffs)
 
         self._rows = rows
         self._cols = cols
