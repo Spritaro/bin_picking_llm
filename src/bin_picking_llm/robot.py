@@ -33,8 +33,7 @@ class Dobot:
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        """Context manager exit point for closing the connection to the Dobot.
-        """
+        """Context manager exit point for closing the connection to the Dobot."""
         self._device.close()
 
     def get_current_position(self) -> Tuple[float, float, float]:
