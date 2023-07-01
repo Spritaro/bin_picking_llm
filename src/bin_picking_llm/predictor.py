@@ -1,11 +1,9 @@
 from collections import namedtuple
 import os.path
 import sys
-from typing import Optional, Tuple
+from typing import Tuple
 
-import cv2
 from detectron2.config import get_cfg
-from detectron2.utils.visualizer import VisImage
 import numpy as np
 import torch
 
@@ -16,30 +14,6 @@ from centernet.config import add_centernet_config
 sys.path.append("third_party/Detic")
 from detic.config import add_detic_config
 from detic.predictor import BUILDIN_CLASSIFIER, VisualizationDemo
-
-
-def compute_3d_position(
-    depth: np.ndarray, mask: np.ndarray, camera_matrix: np.ndarray
-) -> Optional[np.ndarray]:
-    """Compute the 3D position of an object given depth and mask images.
-
-    Args:
-        depth: Depth image of shape (height, width) in mm.
-        mask: Mask image of shape (height, width).
-        camera_matrix: Camera matrix of shape (3, 3).
-
-    Returns:
-        3D position of the object in camera coordinates.
-    """
-    point_cloud = cv2.rgbd.depthTo3d(depth=depth, K=camera_matrix, mask=mask)
-    if np.all(np.isnan(point_cloud)):
-        return None
-
-    position = np.nanmean(point_cloud[0], axis=0)
-    if np.any(np.isnan(position)):
-        return None
-
-    return position
 
 
 def setup_cfg():
@@ -93,7 +67,7 @@ class DeticPredictor:
 
         self.demo = VisualizationDemo(cfg, args)
 
-    def predict(self, image: np.ndarray) -> Tuple[np.ndarray, VisImage]:
+    def predict(self, image: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         """Runs object detection on the input image.
 
         Args:
@@ -108,4 +82,4 @@ class DeticPredictor:
         masks = predictions["instances"].pred_masks.detach().cpu().numpy()
         masks = masks.astype(np.uint8) * 255
 
-        return masks, vis_output
+        return masks, vis_output.get_image()

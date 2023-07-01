@@ -1,8 +1,7 @@
 
-from detectron2.utils.visualizer import VisImage
 import numpy as np
 
-from bin_picking_llm.detection import DeticPredictor
+from bin_picking_llm.predictor import DeticPredictor
 
 
 def test_predictor():
@@ -13,4 +12,4 @@ def test_predictor():
     predictions, vis_output = predictor.predict(image)
 
     assert isinstance(predictions, np.ndarray)
-    assert isinstance(vis_output, VisImage)
+    assert isinstance(vis_output, np.ndarray)
