@@ -9,7 +9,7 @@ from .utils import create_camera_matrix, create_dist_coeffs
 def compute_3d_position(
     depth: np.ndarray, mask: np.ndarray, camera_matrix: np.ndarray
 ) -> Optional[np.ndarray]:
-    """Compute the 3D position of an object given depth and mask images.
+    """Computes the 3D position of an object given depth and mask images.
 
     Args:
         depth: Depth image of shape (height, width) in mm.
@@ -17,8 +17,11 @@ def compute_3d_position(
         camera_matrix: Camera matrix of shape (3, 3).
 
     Returns:
-        3D position of the object in camera coordinates.
+        3D position of the object in camera coordinates in mm.
     """
+    # The point cloud unit will be the same as depth only when depth is float
+    depth = depth.astype(np.float32)
+
     point_cloud = cv2.rgbd.depthTo3d(depth=depth, K=camera_matrix, mask=mask)
     if np.all(np.isnan(point_cloud)):
         return None
