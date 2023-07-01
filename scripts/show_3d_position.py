@@ -8,7 +8,13 @@ from bin_picking_llm.predictor import DeticPredictor
 def main():
     with RealSenseCamera() as camera:
         intrinsics = camera.get_intrinsics()
-        pose_calculator = PoseCalculator(intrinsics)
+        pose_calculator = PoseCalculator(
+            fx=intrinsics["depth"]["fx"],
+            fy=intrinsics["depth"]["fy"],
+            cx=intrinsics["depth"]["cx"],
+            cy=intrinsics["depth"]["cy"],
+            dist_coeffs=intrinsics["depth"]["dist_coeffs"],
+        )
 
         predictor = DeticPredictor()
 

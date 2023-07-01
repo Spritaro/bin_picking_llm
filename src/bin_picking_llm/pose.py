@@ -35,18 +35,23 @@ class PoseCalculator:
     camera intrinsics.
 
     Args:
-        intrinsics (Dict): Dictionary containing camera intrinsics, including
-            depth fx, fy, cx, cy, and distortion coefficients.
+        fx: Focal length of the camera in the x direction.
+        fy: Focal length of the camera in the y direction.
+        cx: X-coordinate of the principal point.
+        cy: Y-coordinate of the principal point.
+        dist_coeffs: Distortion coefficients of the camera.
     """
 
-    def __init__(self, intrinsics: Dict):
-        self._camera_matrix = create_camera_matrix(
-            fx=intrinsics["depth"]["fx"],
-            fy=intrinsics["depth"]["fy"],
-            cx=intrinsics["depth"]["cx"],
-            cy=intrinsics["depth"]["cy"],
-        )
-        self._dist_coeffs = create_dist_coeffs(intrinsics["depth"]["dist_coeffs"])
+    def __init__(
+        self,
+        fx: float,
+        fy: float,
+        cx: float,
+        cy: float,
+        dist_coeffs: List[float],
+    ):
+        self._camera_matrix = create_camera_matrix(fx, fy, cx, cy)
+        self._dist_coeffs = create_dist_coeffs(dist_coeffs)
 
         self._rvec = np.zeros(3, dtype=np.float32)
         self._tvec = np.zeros(3, dtype=np.float32)
