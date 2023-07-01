@@ -38,7 +38,7 @@ def compute_3d_position(
     position = np.nanmean(point_cloud[0], axis=0)
     if np.any(np.isnan(position)):
         return None
-    
+
     return position
 
 
