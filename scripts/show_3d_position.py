@@ -1,5 +1,7 @@
 import cv2
+import numpy as np
 
+from bin_picking_llm import config
 from bin_picking_llm.camera import RealSenseCamera
 from bin_picking_llm.pose import PoseCalculator
 from bin_picking_llm.predictor import DeticPredictor
@@ -14,6 +16,8 @@ def main():
             cx=intrinsics["depth"]["cx"],
             cy=intrinsics["depth"]["cy"],
             dist_coeffs=intrinsics["depth"]["dist_coeffs"],
+            camera_to_base=np.load(config.CAMERA_BASE_PATH),
+            base_to_robot=np.load(config.ROBOT_BASE_PATH),
         )
 
         predictor = DeticPredictor()

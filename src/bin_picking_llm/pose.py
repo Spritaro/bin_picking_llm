@@ -33,6 +33,26 @@ def compute_3d_position(
     return position
 
 
+def apply_transform(position: np.ndarray, transform: np.ndarray) -> np.ndarray:
+    """Applies affine transform matrix to a 3D position.
+
+    Args:
+        position: The 3D position to transform.
+        transform: The affine transform matrix of shape (4, 4).
+
+    Returns:
+        The transformed 3D position.
+    """
+    # Append 1 to the position vector
+    position = np.append(position, 1)
+
+    # Apply transform
+    position = np.dot(transform, position)
+
+    # Extract the transformed position
+    return position[:3]
+
+
 class PoseCalculator:
     """Class for calculating 3D positions using depth and mask images with
     camera intrinsics.
@@ -52,9 +72,15 @@ class PoseCalculator:
         cx: float,
         cy: float,
         dist_coeffs: List[float],
+        camera_to_base: np.ndarray,
+        base_to_robot: np.ndarray,
     ):
         self._camera_matrix = create_camera_matrix(fx, fy, cx, cy)
         self._dist_coeffs = create_dist_coeffs(dist_coeffs)
+
+        # self._camera_to_robot = np.dot(base_to_robot, camera_to_base)
+        self._camera_to_base = camera_to_base
+        self._base_to_robot = base_to_robot
 
         self._rvec = np.zeros(3, dtype=np.float32)
         self._tvec = np.zeros(3, dtype=np.float32)
@@ -82,9 +108,10 @@ class PoseCalculator:
         positions = []
         for mask in masks:
             position = compute_3d_position(depth, mask, self._camera_matrix)
-            positions.append(position)
+            print(f"before {position}")
 
             if position is None:
+                positions.append(None)
                 continue
 
             if color is not None:
@@ -98,5 +125,13 @@ class PoseCalculator:
                 )
                 center = image_point.flatten().astype(np.int32)
                 cv2.circle(pos_color, center, radius=3, color=(0, 0, 255))
+
+            # position = apply_transform(position, self._camera_to_robot)
+            position = apply_transform(position, self._camera_to_base)
+            print(f"middle {position}")
+            position = apply_transform(position, self._base_to_robot)
+            print(f"after {position}")
+            print("")
+            positions.append(position)
 
         return positions, pos_color
