@@ -83,7 +83,8 @@ class CameraBaseCalibrator:
 
     def calc_transform_matrix(self, rvecs: np.ndarray, tvecs: np.ndarray) -> np.ndarray:
         """
-        Calculates the affine transformation matrix representing the pose of the checkerboard.
+        Calculates the affine transformation matrix representing the
+            transformation from camera coordinate to checkerboard coordinate.
 
         Args:
             rvecs: Rotation vector representing the orientation of the checkerboard.
@@ -92,15 +93,15 @@ class CameraBaseCalibrator:
 
         Returns:
             4x4 affine transformation matrix.
-
         """
         # Convert rotation vector to rotation matrix
         rotation_matrix, _ = cv2.Rodrigues(rvecs)
+        rotation_matrix = rotation_matrix.T
 
         # Create affine transformation matrix
         transform_matrix = np.zeros((4, 4), dtype=np.float32)
         transform_matrix[:3, :3] = rotation_matrix
-        transform_matrix[:3, 3:4] = tvecs
+        transform_matrix[:3, 3:4] = -np.dot(rotation_matrix, tvecs)
         transform_matrix[3, 3] = 1
         return transform_matrix
 
