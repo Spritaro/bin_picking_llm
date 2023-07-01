@@ -10,7 +10,6 @@ class RealSenseCamera:
     """Class to access RealSense camera."""
 
     def __init__(self):
-        """Initializes the RealSenseCamera object."""
         self._pipeline = rs.pipeline()
         self._config = rs.config()
         self._align = rs.align(rs.stream.color)

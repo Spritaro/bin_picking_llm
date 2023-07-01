@@ -7,15 +7,14 @@ import pydobot
 
 
 class Dobot:
-    """Class representing a Dobot robotic arm."""
+    """Class representing a Dobot robotic arm.
+
+    Args:
+        port: Serial port to connect to the Dobot. If not provided,
+        the first available port will be used.
+    """
 
     def __init__(self, port: Optional[str] = None):
-        """Initializes Dobot object.
-
-        Args:
-            port: Serial port to connect to the Dobot. If not provided,
-            the first available port will be used.
-        """
         self._port = port
 
     def __enter__(self):

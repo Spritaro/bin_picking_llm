@@ -10,7 +10,18 @@ from .utils import create_camera_matrix, create_dist_coeffs
 
 class CameraBaseCalibrator:
     """Class for calibrating the pose of a checkerboard pattern with respect
-    to a camera."""
+    to a camera.
+
+    Args:
+        fx: Focal length of the camera in the x direction.
+        fy: Focal length of the camera in the y direction.
+        cx: X-coordinate of the principal point.
+        cy: Y-coordinate of the principal point.
+        dist_coeffs: Distortion coefficients of the camera.
+        rows: Number of rows in the checkerboard pattern.
+        cols: Number of columns in the checkerboard pattern.
+        square_size: Size of each square in the checkerboard pattern.
+    """
 
     def __init__(
         self,
@@ -23,18 +34,6 @@ class CameraBaseCalibrator:
         cols: int,
         square_size: float,
     ):
-        """Initializes the camera base calibrator object.
-
-        Args:
-            fx: Focal length of the camera in the x direction.
-            fy: Focal length of the camera in the y direction.
-            cx: X-coordinate of the principal point.
-            cy: Y-coordinate of the principal point.
-            dist_coeffs: Distortion coefficients of the camera.
-            rows: Number of rows in the checkerboard pattern.
-            cols: Number of columns in the checkerboard pattern.
-            square_size: Size of each square in the checkerboard pattern.
-        """
         self._camera_matrix = create_camera_matrix(fx, fy, cx, cy)
         self._dist_coeffs = create_dist_coeffs(dist_coeffs)
 
@@ -132,7 +131,14 @@ class CameraBaseCalibrator:
 
 class RobotBaseCalibrator:
     """Class for calibrating the pose of a robot with respect to a
-    checkerboard."""
+    checkerboard.
+
+    Args:
+        rows: Number of rows in the checkerboard pattern.
+        cols: Number of columns in the checkerboard pattern.
+        square_size: Size of each square in the checkerboard
+        pattern.
+    """
 
     def __init__(
         self,
@@ -140,14 +146,6 @@ class RobotBaseCalibrator:
         cols: int,
         square_size: float,
     ):
-        """Initializes robot base calibrator object.
-
-        Args:
-            rows: Number of rows in the checkerboard pattern.
-            cols: Number of columns in the checkerboard pattern.
-            square_size: Size of each square in the checkerboard
-            pattern.
-        """
         self._board_height = rows * square_size
         self._board_width = cols * square_size
         self.clear_points()
