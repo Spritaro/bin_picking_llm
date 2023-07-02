@@ -86,8 +86,10 @@ def main():
 
         def move_robot_arm(position):
             print(f"Moving robot arm to {position}.")
-
-            position = [float(x.strip()) for x in position.split(",")]
+            try:
+                position = [float(x.strip()) for x in position.split(",")]
+            except ValueError:
+                return "Failed to parse arguemnt"
             robot.move_to(*position, r=0)
             return "Success"
 
