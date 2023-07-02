@@ -9,7 +9,8 @@ def test_predictor():
 
     image = np.zeros((640, 480, 3), dtype=np.uint8)
 
-    predictions, vis_output = predictor.predict(image)
+    names, predictions, vis_output = predictor.predict(image)
 
+    assert isinstance(names, list)
     assert isinstance(predictions, np.ndarray)
     assert isinstance(vis_output, np.ndarray)

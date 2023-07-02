@@ -8,6 +8,7 @@ version = "0.0.1"
 description = "Package for controlling robots to perform bin picking using LLMs"
 dependencies = [
   "detectron2@git+https://github.com/facebookresearch/detectron2.git",
+  "openai",
   "opencv-contrib-python",
   "opencv-python",
   "pydobot",

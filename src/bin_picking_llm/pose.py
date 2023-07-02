@@ -78,9 +78,9 @@ class PoseCalculator:
         self._camera_matrix = create_camera_matrix(fx, fy, cx, cy)
         self._dist_coeffs = create_dist_coeffs(dist_coeffs)
 
-        # self._camera_to_robot = np.dot(base_to_robot, camera_to_base)
-        self._camera_to_base = camera_to_base
-        self._base_to_robot = base_to_robot
+        self._camera_to_robot = np.dot(base_to_robot, camera_to_base)
+        # self._camera_to_base = camera_to_base
+        # self._base_to_robot = base_to_robot
 
         self._rvec = np.zeros(3, dtype=np.float32)
         self._tvec = np.zeros(3, dtype=np.float32)
@@ -108,7 +108,7 @@ class PoseCalculator:
         positions = []
         for mask in masks:
             position = compute_3d_position(depth, mask, self._camera_matrix)
-            print(f"before {position}")
+            # print(f"before {position}")
 
             if position is None:
                 positions.append(None)
@@ -126,12 +126,12 @@ class PoseCalculator:
                 center = image_point.flatten().astype(np.int32)
                 cv2.circle(pos_color, center, radius=3, color=(0, 0, 255))
 
-            # position = apply_transform(position, self._camera_to_robot)
-            position = apply_transform(position, self._camera_to_base)
-            print(f"middle {position}")
-            position = apply_transform(position, self._base_to_robot)
-            print(f"after {position}")
-            print("")
+            position = apply_transform(position, self._camera_to_robot)
+            # position = apply_transform(position, self._camera_to_base)
+            # print(f"middle {position}")
+            # position = apply_transform(position, self._base_to_robot)
+            # print(f"after {position}")
+            # print("")
             positions.append(position)
 
         return positions, pos_color

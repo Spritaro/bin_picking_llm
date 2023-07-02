@@ -28,7 +28,8 @@ def main():
                 continue
 
             # 2D object detection
-            masks, vis_output = predictor.predict(color)
+            names, masks, vis_output = predictor.predict(color)
+            print(names)
 
             # 3D pose calculation
             _, pos_output = pose_calculator.calculate(depth, masks, color)
