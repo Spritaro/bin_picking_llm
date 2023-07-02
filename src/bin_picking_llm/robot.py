@@ -54,3 +54,9 @@ class Dobot:
             r: Target rotation angle.
         """
         self._device.move_to(x, y, z, r, wait=True)
+
+    def grasp(self):
+        self._device.grip(True)
+
+    def release(self):
+        self._device.grip(False)

@@ -93,10 +93,12 @@ def main():
 
         def grasp():
             print("Grasping.")
+            robot.grasp()
             return "Success"
 
         def release():
             print("Releasing.")
+            robot.release()
             return "Success"
 
         function_map = {
