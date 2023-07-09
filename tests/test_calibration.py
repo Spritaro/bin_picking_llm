@@ -11,9 +11,9 @@ def test_robot_base_identity_transform():
 
     # Add calibration points
     calibrator.add_point(0, 0, 0)
-    calibrator.add_point(rows * square_size, 0, 0)
-    calibrator.add_point(rows * square_size, cols * square_size, 0)
-    calibrator.add_point(0, cols * square_size, 0)
+    calibrator.add_point((cols - 1) * square_size, 0, 0)
+    calibrator.add_point((cols - 1) * square_size, (rows - 1) * square_size, 0)
+    calibrator.add_point(0, (rows - 1) * square_size, 0)
 
     # Check if the calibrator is ready
     assert calibrator.is_ready()

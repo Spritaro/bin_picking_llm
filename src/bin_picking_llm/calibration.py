@@ -147,8 +147,8 @@ class RobotBaseCalibrator:
         cols: int,
         square_size: float,
     ):
-        self._board_height = rows * square_size
-        self._board_width = cols * square_size
+        self._board_height = (rows - 1) * square_size
+        self._board_width = (cols - 1) * square_size
         self.clear_points()
 
     def clear_points(self) -> None:
@@ -187,9 +187,9 @@ class RobotBaseCalibrator:
         board_points = np.array(
             [
                 [0, 0, 0],
-                [self._board_height, 0, 0],
-                [self._board_height, self._board_width, 0],
-                [0, self._board_width, 0],
+                [self._board_width, 0, 0],
+                [self._board_width, self._board_height, 0],
+                [0, self._board_height, 0],
             ],
             dtype=np.float32,
         )
@@ -197,12 +197,15 @@ class RobotBaseCalibrator:
         robot_points = np.array(self._points, dtype=np.float32)
 
         # Create affine transformation matrix
-        _, out, inliers = cv2.estimateAffine3D(src=board_points, dst=robot_points)
+        retval, scale = cv2.estimateAffine3D(
+            src=board_points, dst=robot_points, force_rotation=True
+        )
 
-        # All 4 points should be inliers
-        assert all(map(lambda x: x == 1, inliers))
+        print(board_points)
+        print(robot_points)
+        print(scale)
 
         affine_transform_matrix = np.zeros((4, 4), dtype=np.float32)
-        affine_transform_matrix[:3, :] = out
+        affine_transform_matrix[:3, :] = retval
         affine_transform_matrix[3, 3] = 1
         return affine_transform_matrix

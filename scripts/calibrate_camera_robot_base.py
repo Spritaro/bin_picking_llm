@@ -79,7 +79,8 @@ def main():
             if key & 0xFF == ord("c"):
                 print(camera_matrix)
                 if camera_matrix is not None:
-                    np.save(config.CAMERA_BASE_PATH, camera_matrix)
+                    with open(config.CAMERA_BASE_PATH, "wb") as f:
+                        np.save(f, camera_matrix)
 
             if key & 0xFF == 13:  # Enter key
                 x, y, z = robot.get_current_position()
@@ -90,7 +91,8 @@ def main():
                     robot_matrix = robot_calibrator.calc_transform_matrix()
                     print(robot_matrix)
                     if robot_matrix is not None:
-                        np.save(config.ROBOT_BASE_PATH, robot_matrix)
+                        with open(config.ROBOT_BASE_PATH, "wb") as f:
+                            np.save(f, robot_matrix)
 
             if key & 0xFF == 27:  # ESC key
                 robot_calibrator.clear_points()
