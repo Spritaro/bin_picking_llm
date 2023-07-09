@@ -14,8 +14,13 @@ functions = [
         "description": "Runs object detection and returns the names and the 3D positions of the detected objects. The unit is in mm",
         "parameters": {
             "type": "object",
-            "properties": {},
-            "required": [],
+            "properties": {
+                "class_names": {
+                    "type": "string",
+                    "description": "A string containing one or more class names to detect. separated by comma.",
+                }
+            },
+            "required": ["class_names"],
         },
     },
     {
@@ -67,14 +72,14 @@ def main():
         )
         predictor = DeticPredictor()
 
-        def detect_objects():
+        def detect_objects(class_names):
             print("Running object detection.")
 
             color, depth = camera.get_images()
             if color is None or depth is None:
                 return "Failure"
 
-            names, masks, _ = predictor.predict(color)
+            names, masks, _ = predictor.predict(color, class_names.split(","))
             positions, _ = pose_calculator.calculate(depth, masks)
             return [
                 {

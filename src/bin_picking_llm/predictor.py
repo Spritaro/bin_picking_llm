@@ -1,9 +1,11 @@
-from collections import namedtuple
-import os.path
 import sys
 from typing import List, Tuple
 
 from detectron2.config import get_cfg
+from detectron2.data import Metadata
+from detectron2.engine.defaults import DefaultPredictor
+from detectron2.structures.instances import Instances
+from detectron2.utils.visualizer import Visualizer
 import numpy as np
 import torch
 
@@ -13,7 +15,8 @@ from centernet.config import add_centernet_config
 
 sys.path.append("third_party/Detic")
 from detic.config import add_detic_config
-from detic.predictor import BUILDIN_CLASSIFIER, VisualizationDemo
+from detic.modeling.utils import reset_cls_test
+from detic.predictor import get_clip_embeddings
 
 
 def setup_cfg():
@@ -45,7 +48,7 @@ def setup_cfg():
     )
 
     # Predict all classes
-    cfg.MODEL.ROI_HEADS.ONE_CLASS_PER_PROPOSAL = True
+    cfg.MODEL.ROI_HEADS.ONE_CLASS_PER_PROPOSAL = False
 
     cfg.freeze()
     return cfg
@@ -55,36 +58,50 @@ class DeticPredictor:
     """Class to perform object detection using Detic."""
 
     def __init__(self):
-        Args = namedtuple("Args", "vocabulary, custom_vocabulary")
-        args = Args(vocabulary="lvis", custom_vocabulary="")
-
-        # NOTE: Hacky workaround to fix classifier path
-        BUILDIN_CLASSIFIER[args.vocabulary] = os.path.join(
-            "third_party/Detic", BUILDIN_CLASSIFIER[args.vocabulary]
-        )
-
         cfg = setup_cfg()
+        self.predictor = DefaultPredictor(cfg)
 
-        self.demo = VisualizationDemo(cfg, args)
+        self.cpu_device = torch.device("cpu")
 
-    def predict(self, image: np.ndarray) -> Tuple[List[str], np.ndarray, np.ndarray]:
+    def predict(
+        self, image: np.ndarray, class_names: List[str]
+    ) -> Tuple[List[str], np.ndarray, np.ndarray]:
         """Runs object detection on the input image.
 
         Args:
             image: a color image in BGR channel order.
+            custom_vocabulary: a list containing class names to detect.
 
         Returns:
             List of names of detected objects.
             Mask prediction.
             Visualized image output.
         """
-        predictions, vis_output = self.demo.run_on_image(image)
+        # Create classifier for given class names
+        metadata = Metadata()
+        metadata.thing_classes = class_names
+        classifier = get_clip_embeddings(metadata.thing_classes)
+        num_classes = len(metadata.thing_classes)
+        reset_cls_test(self.predictor.model, classifier, num_classes)
 
-        classes = predictions["instances"].pred_classes.cpu().numpy()
-        class_names = self.demo.metadata.thing_classes
+        # Run prediction
+        predictions = self.predictor(image)
+
+        # Parse predictions
+        instances = predictions["instances"].to(self.cpu_device)
+
+        classes = instances.pred_classes.numpy()
+        class_names = metadata.thing_classes
         names = [class_names[i] for i in classes]
 
-        masks = predictions["instances"].pred_masks.detach().cpu().numpy()
+        masks = instances.pred_masks.detach().numpy()
         masks = masks.astype(np.uint8) * 255
 
-        return names, masks, vis_output.get_image()
+        return names, masks, self.visualize(image, metadata, instances)
+
+    def visualize(
+        self, image: np.ndarray, metadata: Metadata, instances: Instances
+    ) -> np.ndarray:
+        visualizer = Visualizer(image, metadata)
+        vis_output = visualizer.draw_instance_predictions(predictions=instances)
+        return vis_output.get_image()
