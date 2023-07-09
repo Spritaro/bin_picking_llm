@@ -115,10 +115,11 @@ def main():
             "release": release,
         }
 
+        llm = ChatGPT(functions, function_map)
+
         while True:
             prompt = input("Prompt: ")
 
-            llm = ChatGPT(functions, function_map)
             message = llm.chat(prompt)
             print(f"Response: {message}")
 
